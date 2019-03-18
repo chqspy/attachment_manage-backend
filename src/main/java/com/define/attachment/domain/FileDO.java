@@ -15,14 +15,17 @@ import javax.persistence.Table;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class FileDO extends BaseDAO {
-    @Column(columnDefinition = "varchar(10) COMMENT '附件类型'")
-    private String type;
+    @Column(columnDefinition = "int(10) COMMENT '附件类型'")
+    private Integer type;
 
     @Column(columnDefinition = "varchar(255) COMMENT '附件地址'")
     private String url;
 
     @Column(columnDefinition = "varchar(255) COMMENT '附件名称'")
     private String fileName;
+
+    @Column(columnDefinition = "varchar(255) COMMENT '原始附件名称'")
+    private String originalFileName;
 
     @Column(columnDefinition = "varchar(45) COMMENT '附件大小'")
     private String fileSize;
