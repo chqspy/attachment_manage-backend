@@ -114,6 +114,40 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public UeditorImageDO uploadScrawl(String file) throws Exception {
+        InetAddress addr = InetAddress.getLocalHost();
+        String ip = addr.getHostAddress().toString();
+        String urlPrefix = "http://" + ip + ":" + port;
+        UeditorImageDO ueditorImageDO = new UeditorImageDO();
+        Long fileSize = FileUtil.imageSize(file);
+        String fileName = "scrawl.jpg";
+        fileName = FileUtil.renameToUUID(fileName);
+        String filesize = this.formetFileSize(fileSize);
+        int fileType = 0;
+        boolean image = FileUtil.generateImage(file, uploadConfig.getUploadPath() + this.getUploadFileUrl(fileType), fileName);
+        if (image) {
+            FileDO fileDO = new FileDO();
+            fileDO.setType(fileType);
+            fileDO.setUrl("/files/" + this.getUploadFileUrl(fileType) + fileName);
+            fileDO.setFileName(fileName);
+            fileDO.setOriginalFileName(fileName);
+            fileDO.setFileSize(filesize);
+            FileUtil.uploadFile(file.getBytes(), uploadConfig.getUploadPath() + this.getUploadFileUrl(fileType), fileName);
+            if (fileDao.save(fileDO) > 0) {
+                ueditorImageDO.setState("SUCCESS");
+                ueditorImageDO.setUrl(urlPrefix + fileDO.getUrl());
+                ueditorImageDO.setTitle(fileDO.getOriginalFileName());
+                ueditorImageDO.setOriginal(fileDO.getOriginalFileName());
+            } else {
+                ueditorImageDO.setState("FAIL");
+            }
+        } else {
+            ueditorImageDO.setState("FAIL");
+        }
+        return ueditorImageDO;
+    }
+
+    @Override
     public String formetFileSize(long filesize) {
         DecimalFormat df = new DecimalFormat("#.0");
         String fileSizeString = "";

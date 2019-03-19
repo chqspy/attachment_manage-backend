@@ -21,10 +21,31 @@ public class FileController {
     @Autowired
     private FileService fileService;
 
+    /**
+     * 通用上传接口
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
     @ResponseBody
     @RequestMapping("/upload")
     public UeditorImageDO upload(@RequestParam("upfile") MultipartFile file) throws Exception {
         return fileService.uploadFile(file);
+    }
+
+
+    /**
+     * 涂鸦上传
+     *
+     * @param file
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping("/uploadScrawl")
+    public UeditorImageDO uploadScrawl(@RequestParam("upfile") String file) throws Exception {
+        return fileService.uploadScrawl(file);
     }
 
 }

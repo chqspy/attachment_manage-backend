@@ -35,6 +35,8 @@ public interface FileService {
 
     UeditorImageDO uploadFile(MultipartFile file) throws Exception;
 
+    UeditorImageDO uploadScrawl(String file) throws Exception;
+
     String formetFileSize(long filesize);
 
     String getUploadFileUrl(int fileType);
