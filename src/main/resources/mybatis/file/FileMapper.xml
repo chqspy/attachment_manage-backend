@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.define.attachment.dao.FileDao">
+
+    <select id="get" resultType="com.define.attachment.domain.FileDO">
+		select `id`,`create_time`,`update_time`,`file_name`,`file_size`,`original_file_name`,`type`,`url` from dy_attachment where id = #{value}
+	</select>
+
+    <select id="list" resultType="com.define.attachment.domain.FileDO">
+        select `id`,`create_time`,`update_time`,`file_name`,`file_size`,`original_file_name`,`type`,`url` from
+        dy_attachment
+        <where>
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="createTime != null and createTime != ''">and create_time = #{createTime}</if>
+            <if test="updateTime != null and updateTime != ''">and update_time = #{updateTime}</if>
+            <if test="fileName != null and fileName != ''">and file_name = #{fileName}</if>
+            <if test="fileSize != null and fileSize != ''">and file_size = #{fileSize}</if>
+            <if test="originalFileName != null and originalFileName != ''">and original_file_name =
+                #{originalFileName}
+            </if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="url != null and url != ''">and url = #{url}</if>
+        </where>
+        <choose>
+            <when test="sort != null and sort.trim() != ''">
+                order by ${sort} ${order}
+            </when>
+            <otherwise>
+                order by id desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*) from dy_attachment
+        <where>
+            <if test="id != null and id != ''">and id = #{id}</if>
+            <if test="createTime != null and createTime != ''">and create_time = #{createTime}</if>
+            <if test="updateTime != null and updateTime != ''">and update_time = #{updateTime}</if>
+            <if test="fileName != null and fileName != ''">and file_name = #{fileName}</if>
+            <if test="fileSize != null and fileSize != ''">and file_size = #{fileSize}</if>
+            <if test="originalFileName != null and originalFileName != ''">and original_file_name =
+                #{originalFileName}
+            </if>
+            <if test="type != null and type != ''">and type = #{type}</if>
+            <if test="url != null and url != ''">and url = #{url}</if>
+        </where>
+    </select>
+
+    <insert id="save" parameterType="com.define.attachment.domain.FileDO" useGeneratedKeys="true" keyProperty="id">
+		insert into dy_attachment
+		(
+			`create_time`,
+			`update_time`,
+			`file_name`,
+			`file_size`,
+			`original_file_name`,
+			`type`,
+			`url`
+		)
+		values
+		(
+			#{createTime},
+			#{updateTime},
+			#{fileName},
+			#{fileSize},
+			#{originalFileName},
+			#{type},
+			#{url}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.define.attachment.domain.FileDO">
+        update dy_attachment
+        <set>
+            <if test="createTime != null">`create_time` = #{createTime},</if>
+            <if test="updateTime != null">`update_time` = #{updateTime},</if>
+            <if test="fileName != null">`file_name` = #{fileName},</if>
+            <if test="fileSize != null">`file_size` = #{fileSize},</if>
+            <if test="originalFileName != null">`original_file_name` = #{originalFileName},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="url != null">`url` = #{url}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="remove">
+		delete from dy_attachment where id = #{value}
+	</delete>
+
+    <delete id="batchRemove">
+        delete from dy_attachment where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getFileList" resultType="com.define.attachment.domain.FileDO">
+        select * from dy_attachment where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

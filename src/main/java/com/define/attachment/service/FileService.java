@@ -1,7 +1,7 @@
 package com.define.attachment.service;
 
 import com.define.attachment.domain.FileDO;
-import com.define.common.utils.R;
+import com.define.ueditor.domain.UeditorImageDO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -33,7 +33,9 @@ public interface FileService {
 
     Boolean isExist(String url);
 
-    R uploadFile(MultipartFile file);
+    UeditorImageDO uploadFile(MultipartFile file) throws Exception;
 
     String formetFileSize(long filesize);
+
+    String getUploadFileUrl(int fileType);
 }

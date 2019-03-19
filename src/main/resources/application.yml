@@ -48,10 +48,6 @@ spring:
         dialect: org.hibernate.dialect.MySQL5Dialect
     show-sql: true
     database: mysql
-  http:
-    multipart:
-      max-file-size: 30Mb
-      max-request-size: 30Mb
   devtools:
     restart:
       enabled: false

@@ -4,19 +4,21 @@ import com.define.attachment.dao.FileDao;
 import com.define.attachment.domain.FileDO;
 import com.define.attachment.service.FileService;
 import com.define.common.config.UploadConfig;
-import com.define.common.exception.business.BusinessException;
 import com.define.common.utils.FileType;
 import com.define.common.utils.FileUtil;
-import com.define.common.utils.R;
+import com.define.ueditor.domain.UeditorImageDO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.text.DecimalFormat;
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,10 @@ import java.util.Map;
 @Service
 @Transactional
 public class FileServiceImpl implements FileService {
+
+    @Value("${server.port}")
+    private String port;
+
     @Autowired
     private FileDao fileDao;
 
@@ -80,29 +86,31 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public R uploadFile(MultipartFile file) {
+    public UeditorImageDO uploadFile(MultipartFile file) throws Exception {
+        InetAddress addr = InetAddress.getLocalHost();
+        String ip = addr.getHostAddress().toString();
+        String urlPrefix = "http://" + ip + ":" + port;
+        UeditorImageDO ueditorImageDO = new UeditorImageDO();
         String fileName = file.getOriginalFilename();
         fileName = FileUtil.renameToUUID(fileName);
         String filesize = this.formetFileSize(file.getSize());
+        int fileType = FileType.fileType(fileName);
         FileDO fileDO = new FileDO();
-        fileDO.setType(FileType.fileType(fileName));
-        fileDO.setUrl("/files/" + fileName);
+        fileDO.setType(fileType);
+        fileDO.setUrl("/files/" + this.getUploadFileUrl(fileType) + fileName);
         fileDO.setFileName(fileName);
         fileDO.setOriginalFileName(file.getOriginalFilename());
         fileDO.setFileSize(filesize);
-        try {
-            FileUtil.uploadFile(file.getBytes(), uploadConfig.getUploadPath(), fileName);
-        } catch (Exception e) {
-        }
-
+        FileUtil.uploadFile(file.getBytes(), uploadConfig.getUploadPath() + this.getUploadFileUrl(fileType), fileName);
         if (fileDao.save(fileDO) > 0) {
-            Map map = new HashMap();
-            map.put("fileId", fileDO.getId());
-            map.put("fileName", fileDO.getUrl());
-            return R.ok(map);
+            ueditorImageDO.setState("SUCCESS");
+            ueditorImageDO.setUrl(urlPrefix + fileDO.getUrl());
+            ueditorImageDO.setTitle(fileDO.getOriginalFileName());
+            ueditorImageDO.setOriginal(fileDO.getOriginalFileName());
         } else {
-            throw new BusinessException(500, "上传失败");
+            ueditorImageDO.setState("FAIL");
         }
+        return ueditorImageDO;
     }
 
     @Override
@@ -119,5 +127,30 @@ public class FileServiceImpl implements FileService {
             fileSizeString = df.format((double) filesize / 1073741824) + "Gb";
         }
         return fileSizeString;
+    }
+
+    @Override
+    public String getUploadFileUrl(int fileType) {
+        String filePath = "";
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMM");
+        String curDate = df.format(new Date());
+        switch (fileType) {
+            case 0:
+                filePath = "image/";
+                break;
+            case 1:
+                filePath = "document/";
+                break;
+            case 2:
+                filePath = "video/";
+                break;
+            case 3:
+                filePath = "music/";
+                break;
+            default:
+                filePath = "other/";
+                break;
+        }
+        return filePath + curDate + "/";
     }
 }
