@@ -115,13 +115,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public UeditorImageDO uploadScrawl(String file) throws Exception {
+        System.out.println("######:" + file + ":######");
         InetAddress addr = InetAddress.getLocalHost();
         String ip = addr.getHostAddress().toString();
         String urlPrefix = "http://" + ip + ":" + port;
         UeditorImageDO ueditorImageDO = new UeditorImageDO();
         Long fileSize = FileUtil.imageSize(file);
-        String fileName = "scrawl.jpg";
-        fileName = FileUtil.renameToUUID(fileName);
+        String originalFileName = "scrawl.png";
+        String fileName = FileUtil.renameToUUID(originalFileName);
         String filesize = this.formetFileSize(fileSize);
         int fileType = 0;
         boolean image = FileUtil.generateImage(file, uploadConfig.getUploadPath() + this.getUploadFileUrl(fileType), fileName);
@@ -130,9 +131,8 @@ public class FileServiceImpl implements FileService {
             fileDO.setType(fileType);
             fileDO.setUrl("/files/" + this.getUploadFileUrl(fileType) + fileName);
             fileDO.setFileName(fileName);
-            fileDO.setOriginalFileName(fileName);
+            fileDO.setOriginalFileName(originalFileName);
             fileDO.setFileSize(filesize);
-            FileUtil.uploadFile(file.getBytes(), uploadConfig.getUploadPath() + this.getUploadFileUrl(fileType), fileName);
             if (fileDao.save(fileDO) > 0) {
                 ueditorImageDO.setState("SUCCESS");
                 ueditorImageDO.setUrl(urlPrefix + fileDO.getUrl());

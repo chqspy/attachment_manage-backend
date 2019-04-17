@@ -2,11 +2,13 @@ package com.define.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.Base64;
 import java.util.UUID;
 
 public class FileUtil {
@@ -46,25 +48,13 @@ public class FileUtil {
         if (imgStr == null) {
             return false;
         }
-        BASE64Decoder decoder = new BASE64Decoder();
         try {
             File targetFile = new File(path);
             if (!targetFile.exists()) {
                 targetFile.mkdirs();
             }
             path = path + fileName;
-            // 解密
-            byte[] b = decoder.decodeBuffer(imgStr);
-            // 处理数据
-            for (int i = 0; i < b.length; ++i) {
-                if (b[i] < 0) {
-                    b[i] += 256;
-                }
-            }
-            OutputStream out = new FileOutputStream(path);
-            out.write(b);
-            out.flush();
-            out.close();
+            Files.write(Paths.get(path), Base64.getDecoder().decode(imgStr), StandardOpenOption.CREATE);
             return true;
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -76,8 +66,7 @@ public class FileUtil {
      * 通过图片base64流判断图片等于多少字节
      * image 图片流
      */
-    public static Long imageSize(String image) {
-        String str = image.substring(22); // 1.需要计算文件流大小，首先把头部的data:image/png;base64,（注意有逗号）去掉。
+    public static Long imageSize(String str) {
         Integer equalIndex = str.indexOf("=");//2.找到等号，把等号也去掉
         if (str.indexOf("=") > 0) {
             str = str.substring(0, equalIndex);
